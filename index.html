@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!-- Basic SEO / Social -->
+<meta name="description" content="YV Factor SIP Goal Planner — calculate monthly SIP required to reach your financial goal with optional inflation adjustment." />
+<meta name="theme-color" content="#07121a" />
+<meta property="og:title" content="YV Factor — SIP Goal Planner" />
+<meta property="og:description" content="Calculate the monthly SIP to reach your goal. Includes inflation option and progress visualization." />
+<meta property="og:type" content="website" />
+<!-- Preconnect fonts for a small perf improvement -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>YV Factor — SIP Goal Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07121a;
+  --panel:#0f1720;
+  --gold:#FFD066;
+  --muted:#bfc7d1;
+  --accent:#FFCF66;
+  --glass: rgba(255,255,255,0.03);
+  --card-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Helvetica,Arial;}
+body{
+  background: radial-gradient(1200px 500px at 10% 10%, rgba(255,215,120,0.04), transparent 8%),
+              linear-gradient(180deg,#021018 0%, #07121a 50%, #07121a 100%);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  padding-top: calc(28px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  box-sizing:border-box;
+}
+
+/* Accessibility: visible focus for keyboard users */
+.btn:focus-visible, .muted-btn:focus-visible, input:focus-visible {
+  outline: 3px solid rgba(255,200,60,0.16);
+  outline-offset: 3px;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce){
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition: none !important; }
+  .particles { display: none !important; }
+}
+
+.wrap {
+  width: 100%;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* LEFT: Inputs */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,215,102,0.06);
+  border-radius:16px;
+  box-shadow: var(--card-shadow);
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+  scroll-margin-top: 18px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+.logo {
+  width:52px;height:52px;border-radius:10px;
+  background: linear-gradient(145deg, rgba(255,208,60,0.18), rgba(255,160,20,0.06));
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);
+  box-shadow: 0 6px 18px rgba(255,200,60,0.06), inset 0 -2px 6px rgba(0,0,0,0.2);
+  font-size:18px;
+}
+h1{font-size:1.35rem;margin:0;color:var(--gold);text-shadow:0 4px 20px rgba(0,0,0,0.6)}
+p.lead{color:var(--muted);margin:6px 0 18px;font-size:0.95rem}
+
+label{display:block;font-size:0.85rem;color:var(--muted);margin-top:12px;margin-bottom:6px}
+input[type=number], input[type=text], .row-range{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.01);
+  color:#fff;
+  outline:none;
+  box-sizing:border-box;
+  transition:box-shadow .18s, transform .12s;
+  font-size:1rem;
+}
+input[type=number]:focus, input[type=text]:focus{
+  box-shadow: 0 6px 20px rgba(255,190,30,0.06), 0 0 0 4px rgba(255,200,60,0.03);
+  transform: translateY(-1px);
+}
+
+.controls{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+.btn{
+  background: linear-gradient(180deg,#FFD66F,#FFB948);
+  color:#072026;padding:12px 18px;border-radius:12px;border:none;font-weight:700;
+  cursor:pointer;box-shadow: 0 8px 24px rgba(255,180,40,0.08);transition:transform .12s, box-shadow .12s;
+}
+.btn:active{transform:translateY(2px);box-shadow: 0 4px 16px rgba(0,0,0,0.35);}
+.muted-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:10px 14px;border-radius:10px}
+
+.small{
+  font-size:0.85rem;color:var(--muted);margin-top:8px;
+}
+
+/* RIGHT: Result card */
+.result {
+  display:flex;flex-direction:column;gap:18px;justify-content:flex-start;
+  scroll-margin-top: 18px;
+}
+.panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+  border-radius:16px;padding:18px;border:1px solid rgba(255,215,102,0.05);
+  box-shadow: 0 14px 40px rgba(2,8,12,0.6);
+  min-height:220px;
+}
+/* Circular ring */
+.ring-wrap{
+  display:flex;gap:18px;align-items:center;
+}
+.ring{
+  width:130px;height:130px;border-radius:999px;display:grid;place-items:center;
+  background: radial-gradient(circle at 30% 20%, rgba(255,230,170,0.03), transparent 20%);
+  position:relative;
+}
+svg {transform: rotate(-90deg); width: 130px; height: 130px;}
+.ring .center{
+  position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  pointer-events:none;
+}
+.center .percent{font-size:1.05rem;font-weight:700;color:var(--gold)}
+.center .label{font-size:0.75rem;color:var(--muted)}
+
+.metrics{flex:1}
+.metric{
+  display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;margin-bottom:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+  border:1px solid rgba(255,255,255,0.02);
+}
+.metric .left{color:var(--muted);font-size:0.9rem}
+.metric .value{font-weight:700;color:var(--gold);font-size:1.06rem}
+
+.note{font-size:0.82rem;color:var(--muted);text-align:center;margin-top:6px}
+
+/* Mobile Responsive Tweaks */
+@media (max-width:900px){
+  body{padding:20px;}
+  .wrap {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+    gap: 20px;
+  }
+  .card, .result {width:100%;}
+  .controls{gap:10px;}
+}
+@media (max-width:600px){
+  body {
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px env(safe-area-inset-left, 0px);
+    display:block;
+    min-height:100vh;
+    overflow-y:auto; /* allow scrolling */
+  }
+
+  .wrap {
+    display:block;
+    max-width:100%;
+  }
+
+  .card, .result {
+    width:100%;
+    margin-bottom:20px; /* spacing at bottom so buttons not cut off */
+  }
+
+  h1 {
+    font-size:1.3rem; /* slightly bigger heading */
+    margin-bottom:6px;
+  }
+
+  p.lead {
+    font-size:0.95rem;
+    margin-bottom:12px;
+  }
+
+  .btn, .muted-btn {
+    width:100%;
+    text-align:center;
+  }
+
+  .controls {
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .metric {
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .metric .value {
+    font-size:1rem;
+    margin-top:6px;
+  }
+
+  .ring {
+    width:100px;
+    height:100px;
+  }
+
+  svg {
+    width:100px;
+    height:100px;
+  }
+
+  .center .percent {
+    font-size:0.9rem;
+  }
+
+  /* extra margin for bottom buttons so they are fully visible */
+  .result > div:last-child {
+    margin-bottom:24px;
+  }
+}
+
+@media (max-width:400px){
+  body {
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 12px env(safe-area-inset-left, 0px);
+  }
+
+  .logo {
+    width:42px;
+    height:42px;
+    font-size:16px;
+  }
+
+  .ring {
+    width:90px;
+    height:90px;
+  }
+
+  svg {
+    width:90px;
+    height:90px;
+  }
+
+  .metric {
+    padding:10px;
+  }
+
+  .wrap {
+    gap:20px;
+  }
+
+  label {
+    font-size:0.8rem;
+  }
+
+  input[type=number],
+  input[type=text] {
+    font-size:0.9rem;
+    padding:10px;
+  }
+
+  h1 {
+    font-size:1.15rem;
+  }
+
+  p.lead {
+    font-size:0.9rem;
+  }
+
+  .controls {
+    gap:8px;
+  }
+
+  /* extra bottom spacing for buttons */
+  .result > div:last-child {
+    margin-bottom:20px;
+  }
+}
+
+/* animated particle */
+.particles{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0.4}
+.p{position:absolute;border-radius:999px;background:radial-gradient(circle,#FFD66F 0%, rgba(255,215,102,0.12) 40%, transparent 60%);filter:blur(8px);opacity:0.8}
+@keyframes floaty {
+  0%{transform:translateY(30px) scale(.7);opacity:0}
+  50%{opacity:0.8}
+  100%{transform:translateY(-120px) scale(1);opacity:0}
+}
+
+/* helper */
+.copy {
+  margin-left:8px;background:transparent;border:1px dashed rgba(255,255,255,0.05);padding:6px;border-radius:8px;color:var(--muted);
+  cursor:pointer;font-size:0.8rem;
+}
+.badge{display:inline-block;background:rgba(255,215,102,0.08);padding:6px 10px;border-radius:999px;color:var(--gold);font-weight:700;font-size:0.82rem}
+</style>
+</head>
+<body>
+<div class="wrap" role="main" aria-label="SIP planner">
+  <div class="card">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">YV</div>
+      <div>
+        <h1>YV Factor SIP Goal</h1>
+        <p class="lead">Set your target. We'll calculate the monthly SIP and show progress to the goal.</p>
+      </div>
+    </div>
+
+    <label for="goal">Goal Amount (₹)</label>
+    <input id="goal" type="number" inputmode="numeric" value="1000000" min="1" />
+
+    <label for="years">Investment Duration (years)</label>
+    <input id="years" type="number" value="10" min="1" />
+
+    <label for="returnRate">Expected Return (% p.a.)</label>
+    <input id="returnRate" type="number" value="12" min="0" step="0.1" />
+
+    <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
+      <label style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:0.9rem;">
+        <input id="inflation" type="checkbox" checked /> Include inflation (3% p.a.)
+      </label>
+      <button class="copy muted-btn" id="copy-link">Copy Link</button>
+    </div>
+
+    <div class="controls" style="margin-top:18px;">
+      <button type="button" class="btn" id="calc">Calculate SIP</button>
+      <button type="button" class="muted-btn" id="reset">Reset</button>
+    </div>
+
+    <div class="small">Tip: use exact H1 value you want to reach — the calculator factors compounding.</div>
+    <div class="particles" aria-hidden="true"></div>
+  </div>
+
+  <div class="result">
+    <div class="panel" id="resultPanel" role="status" aria-live="polite">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="badge">Gold Series</div>
+          <div style="font-size:0.9rem;color:var(--muted);margin-top:6px">Goal snapshot</div>
+        </div>
+        <div style="text-align:right;color:var(--muted);font-size:0.9rem">Updated on demand</div>
+      </div>
+
+      <div class="ring-wrap" style="margin-top:16px;">
+        <div class="ring" aria-hidden="true">
+          <svg width="130" height="130" viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#FFD66F"/>
+                <stop offset="1" stop-color="#FFB948"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="48" stroke="rgba(255,255,255,0.05)" stroke-width="12" fill="none"></circle>
+            <circle id="progress" cx="60" cy="60" r="48" stroke="url(#g1)" stroke-width="12" stroke-linecap="round" fill="none"
+              stroke-dasharray="302" stroke-dashoffset="302"></circle>
+          </svg>
+          <div class="center">
+            <div class="percent" id="percentText">0%</div>
+            <div class="label">Goal progress</div>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="left">💰 Monthly SIP</div>
+            <div class="value" id="monthly">—</div>
+          </div>
+          <div class="metric">
+            <div class="left">📈 Total Invested</div>
+            <div class="value" id="invested">—</div>
+          </div>
+          <div class="metric">
+            <div class="left">🏆 Projected Value</div>
+            <div class="value" id="value">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" id="inflationNote">Animation & progress show how much effort monthly will get you to the goal. Small increases compound fast.</div>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:12px;">
+      <button type="button" class="btn" id="saveImage">Export snapshot</button>
+      <button type="button" class="muted-btn" id="shareBtn">Share</button>
+    </div>
+  </div>
+</div>
+
+<noscript>
+  <div style="max-width:980px;margin:20px auto;padding:12px;background:#111;color:#fff;border-radius:8px;text-align:center">This app requires JavaScript to calculate and display results. Please enable JavaScript in your browser.</div>
+</noscript>
+
+<script>
+const $ = sel => document.querySelector(sel);
+
+// ---- helpers ----
+function nFmt(x){
+  if(isNaN(x) || !isFinite(x)) return "—";
+  const abs = Math.abs(Number(x));
+  const options = { maximumFractionDigits: abs < 1 ? 4 : 2 };
+  return '₹' + Number(x).toLocaleString('en-IN', options);
+}
+
+function animateValue(el, start, end, duration=900){
+  const startTime = performance.now();
+  function tick(now){
+    const t = Math.min(1, (now - startTime)/duration);
+    const val = start + (end-start) * easeOutCubic(t);
+    if (el.dataset.type === 'percent') el.textContent = Math.round(val) + '%';
+    else el.textContent = nFmt(val);
+    if(t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+function easeOutCubic(t){return (--t)*t*t+1;}
+
+// ---- calculation logic ----
+function compoundFutureValue(monthly, rateAnnual, years){
+  const r = rateAnnual/12/100, n = years*12;
+  if(n===0) return 0;
+  if(r===0) return monthly*n;
+  return monthly*((Math.pow(1+r,n)-1)/r);
+}
+
+function monthlySIPForTarget(target, rateAnnual, years){
+  const r = rateAnnual/12/100, n=years*12;
+  if(n===0) return 0;
+  if(r===0) return target/n;
+  return (target*r)/(Math.pow(1+r,n)-1);
+}
+
+// --- UI bindings ---
+const goalEl = $('#goal');
+const yearsEl = $('#years');
+const returnEl = $('#returnRate');
+const inflCheckbox = $('#inflation');
+const calcBtn = $('#calc');
+const resetBtn = $('#reset');
+
+const monthlyEl = $('#monthly');
+const investedEl = $('#invested');
+const valueEl = $('#value');
+const percentText = $('#percentText');
+const progressCircle = document.getElementById('progress');
+
+monthlyEl.dataset.type = 'money';
+investedEl.dataset.type = 'money';
+valueEl.dataset.type = 'money';
+percentText.dataset.type = 'percent';
+
+function updateProgressRing(pct){
+  pct = Math.max(0, Math.min(100, pct));
+  const total = 2*Math.PI*48; // circumference = 2πr
+  const offset = total * (1 - pct/100);
+  progressCircle.style.strokeDasharray = total;
+  progressCircle.style.strokeDashoffset = offset;
+}
+
+function calculateAndRender(){
+  const rawGoal = Number(goalEl.value);
+  const years = Number(yearsEl.value);
+  const nominalRate = Number(returnEl.value);
+  const includeInflation = inflCheckbox.checked;
+
+  if (!isFinite(rawGoal) || rawGoal <= 0) return alert('Please enter valid Goal >0.');
+  if (!isFinite(years) || years <= 0) return alert('Please enter valid years >=1.');
+  if (!isFinite(nominalRate) || nominalRate < 0) return alert('Please enter valid return >=0.');
+
+  const inflationRate = includeInflation?3:0;
+  const inflatedGoal = rawGoal * Math.pow(1+inflationRate/100, years);
+
+  const monthly = monthlySIPForTarget(inflatedGoal, nominalRate, years);
+  const months = years*12;
+  const totalInvested = monthly*months;
+  const projectedValue = compoundFutureValue(monthly, nominalRate, years);
+  const pct = inflatedGoal? (projectedValue/inflatedGoal)*100 : 0;
+
+  animateValue(monthlyEl, parseFloat(monthlyEl.textContent.replace(/[^\d.-]+/g,''))||0, monthly);
+  animateValue(investedEl, parseFloat(investedEl.textContent.replace(/[^\d.-]+/g,''))||0, totalInvested);
+  animateValue(valueEl, parseFloat(valueEl.textContent.replace(/[^\d.-]+/g,''))||0, projectedValue);
+  animateValue(percentText, parseFloat(percentText.textContent.replace(/[^\d.-]+/g,''))||0, pct);
+
+  updateProgressRing(pct);
+}
+
+calcBtn.addEventListener('click', calculateAndRender);
+resetBtn.addEventListener('click',()=>{
+  goalEl.value = 1000000; yearsEl.value=10; returnEl.value=12; inflCheckbox.checked=true;
+  monthlyEl.textContent='—';
+  investedEl.textContent='—';
+  valueEl.textContent='—';
+  percentText.textContent='0%';
+  updateProgressRing(0);
+});
+
+// --- particle animation ---
+const particleContainer = document.querySelector('.particles');
+for(let i=0;i<14;i++){
+  const p = document.createElement('div');
+  p.className='p';
+  const size = Math.random()*16+6;
+  p.style.width = p.style.height = size+'px';
+  p.style.left = Math.random()*100+'%';
+  p.style.animationDelay = (Math.random()*2)+'s';
+  p.style.animationDuration = (Math.random()*4+3)+'s';
+  p.style.transform = `translateY(${Math.random()*40}px)`;
+  p.style.opacity = Math.random();
+  p.style.background = `radial-gradient(circle,#FFD66F 0%, rgba(255,215,102,0.12) 40%, transparent 60%)`;
+  p.style.filter = `blur(${Math.random()*4+4}px)`;
+  p.style.animationName='floaty';
+  particleContainer.appendChild(p);
+}
+
+// --- Copy/Share ---
+$('#copy-link').addEventListener('click',()=>{
+  // Try modern clipboard API first, fall back to execCommand if unavailable
+  const url = window.location.href;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>alert('Link copied!')).catch(err=>{
+      console.warn('Clipboard write failed', err);
+      // fallback
+      fallbackCopyTextToClipboard(url);
+    });
+  } else {
+    fallbackCopyTextToClipboard(url);
+  }
+});
+$('#shareBtn').addEventListener('click',()=>{
+  if(navigator.share){
+    navigator.share({title:'SIP Goal Planner',url:window.location.href}).catch((err)=>{
+      console.warn('Share failed', err);
+      alert('Share failed');
+    });
+  } else alert('Sharing not supported on this device');
+});
+
+// Fallback copy helper: create a temporary textarea and execCommand
+function fallbackCopyTextToClipboard(text){
+  try{
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    // Move outside viewport
+    ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok) alert('Link copied!');
+    else alert('Copy failed — select and copy manually');
+  }catch(e){
+    console.warn('Fallback copy failed', e);
+    alert('Copy failed — select and copy manually');
+  }
+}
+</script>
+</body>
+</html>
