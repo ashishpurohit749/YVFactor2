@@ -1,390 +1,432 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="description" content="YV Factor SIP Goal Planner — calculate monthly SIP required to reach your financial goal with optional inflation adjustment." />
-<meta name="theme-color" content="#07121a" />
-<meta property="og:title" content="YV Factor — SIP Goal Planner" />
-<meta property="og:description" content="Calculate the monthly SIP to reach your goal. Includes inflation option and progress visualization." />
-<meta property="og:type" content="website" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<title>YV Factor — SIP Goal Planner</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>YV Factor — Cinematic SIP Toolkit</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
-  --bg:#07121a; --panel:#0f1720; --gold:#FFD066; --muted:#bfc7d1; --accent:#FFCF66;
-  --glass: rgba(255,255,255,0.03); --card-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  --bg:#07121a; --gold:#FFD066; --gold-2:#FFB948; --muted:#bfc7d1;
+  --card-shadow:0 14px 40px rgba(2,8,12,.6); --input-border:1px solid rgba(255,215,102,.15);
 }
-html,body{height:100%;margin:0;font-family:'Poppins',system-ui,Helvetica,Arial;}
-body{
-  background: radial-gradient(1200px 500px at 10% 10%, rgba(255,215,120,0.04), transparent 8%), linear-gradient(180deg,#021018 0%, #07121a 50%, #07121a 100%);
-  color:#fff; display:flex; align-items:center; justify-content:center;
-  padding:28px; padding-top: calc(28px + env(safe-area-inset-top, 0px)); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-  box-sizing:border-box;
-}
-.btn:focus-visible, .muted-btn:focus-visible, input:focus-visible {
-  outline: 3px solid rgba(255,200,60,0.16); outline-offset:3px;
-}
-@media (prefers-reduced-motion: reduce){
-  * { animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition:none !important; }
-  .particles { display:none !important; }
-}
-
-.wrap {
-  width:100%; max-width:980px; display:grid; grid-template-columns:1fr 420px; gap:28px; align-items:start;
-}
-
-/* Card / Left panel */
-.card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border:1px solid rgba(255,215,102,0.06); border-radius:16px; box-shadow:var(--card-shadow);
-  padding:28px; position:relative; overflow:hidden; scroll-margin-top:18px;
-}
-.brand{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
-.logo {
-  width:52px; height:52px; border-radius:10px; display:flex;align-items:center;justify-content:center;
-  font-weight:700;color:var(--gold); font-size:18px;
-  background: linear-gradient(145deg, rgba(255,208,60,0.18), rgba(255,160,20,0.06));
-  box-shadow:0 6px 18px rgba(255,200,60,0.06), inset 0 -2px 6px rgba(0,0,0,0.2);
-}
-h1{font-size:1.35rem;margin:0;color:var(--gold); text-shadow:0 4px 20px rgba(0,0,0,0.6);}
-p.lead{color:var(--muted);margin:6px 0 18px;font-size:0.95rem;}
-label{display:block;font-size:0.85rem;color:var(--muted);margin-top:12px;margin-bottom:6px;}
-input[type=number], input[type=text], .row-range{
-  width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
-  background: rgba(255,255,255,0.01); color:#fff; outline:none; box-sizing:border-box; transition:box-shadow .18s, transform .12s; font-size:1rem;
-}
-input[type=number]:focus, input[type=text]:focus{
-  box-shadow: 0 6px 20px rgba(255,190,30,0.06), 0 0 0 4px rgba(255,200,60,0.03);
-  transform: translateY(-1px);
-}
-.controls{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;}
-.btn{
-  background: linear-gradient(180deg,#FFD66F,#FFB948); color:#072026; padding:12px 18px;
-  border-radius:12px; border:none; font-weight:700; cursor:pointer;
-  box-shadow: 0 8px 24px rgba(255,180,40,0.08); transition: transform .12s, box-shadow .12s;
-}
-.btn:active{transform:translateY(2px); box-shadow:0 4px 16px rgba(0,0,0,0.35);}
-.muted-btn{background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); padding:10px 14px; border-radius:10px;}
-.small{font-size:0.85rem;color:var(--muted);margin-top:8px;}
-
-/* Right / Result panel */
-.result {display:flex;flex-direction:column;gap:18px;justify-content:flex-start; scroll-margin-top:18px;}
-.panel {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03)); border-radius:16px;
-  padding:18px;border:1px solid rgba(255,215,102,0.05); box-shadow:0 14px 40px rgba(2,8,12,0.6); min-height:220px;
-}
-.ring-wrap{display:flex;gap:18px;align-items:center;}
-.ring{
-  width:130px;height:130px;border-radius:999px;display:grid;place-items:center;
-  background: radial-gradient(circle at 30% 20%, rgba(255,230,170,0.03), transparent 20%); position:relative;
-}
-svg {transform: rotate(-90deg); width:130px; height:130px;}
-.ring .center{position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;}
-.center .percent{font-size:1.05rem;font-weight:700;color:var(--gold);}
-.center .label{font-size:0.75rem;color:var(--muted);}
-.metrics{flex:1;}
-.metric{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;margin-bottom:10px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
-  border:1px solid rgba(255,255,255,0.02);
-}
-.metric .left{color:var(--muted);font-size:0.9rem;}
-.metric .value{font-weight:700;color:var(--gold);font-size:1.06rem;}
-.note{font-size:0.82rem;color:var(--muted);text-align:center;margin-top:6px;}
-
-/* Mobile Responsive */
-@media (max-width:900px){
-  body{padding:20px;} .wrap{grid-template-columns:1fr;max-width:100%;gap:20px;}
-  .card, .result {width:100%;} .controls{gap:10px;}
-}
-@media (max-width:600px){
-  body{padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px env(safe-area-inset-left,0px); display:block; min-height:100vh; overflow-y:auto;}
-  .wrap{display:block; max-width:100%;}
-  .card, .result{width:100%; margin-bottom:20px;}
-  h1{font-size:1.3rem; margin-bottom:6px;}
-  p.lead{font-size:0.95rem; margin-bottom:12px;}
-  .btn, .muted-btn{width:100%; text-align:center;}
-  .controls{flex-direction:column; gap:10px;}
-  .metric{flex-direction:column; align-items:flex-start;}
-  .metric .value{font-size:1rem; margin-top:6px;}
-  .ring{width:100px;height:100px;} svg{width:100px;height:100px;}
-  .center .percent{font-size:0.9rem;}
-  .result>div:last-child{margin-bottom:24px;}
-}
-@media (max-width:400px){
-  body{padding: calc(12px + env(safe-area-inset-top,0px)) 12px 12px env(safe-area-inset-left,0px);}
-  .logo{width:42px;height:42px;font-size:16px;}
-  .ring{width:90px;height:90px;} svg{width:90px;height:90px;}
-  .metric{padding:10px;}
-  .wrap{gap:20px;}
-  label{font-size:0.8rem;}
-  input[type=number],input[type=text]{font-size:0.9rem; padding:10px;}
-  h1{font-size:1.15rem;} p.lead{font-size:0.9rem;}
-  .controls{gap:8px;}
-  .result>div:last-child{margin-bottom:20px;}
-}
-
-/* particles */
-.particles{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0.4}
-.p{position:absolute;border-radius:999px;background:radial-gradient(circle,#FFD66F 0%, rgba(255,215,102,0.12) 40%, transparent 60%);filter:blur(8px);opacity:0.8}
-@keyframes floaty {0%{transform:translateY(30px) scale(.7);opacity:0}50%{opacity:0.8}100%{transform:translateY(-120px) scale(1);opacity:0}}
-
-/* helpers */
-.copy{margin-left:8px;background:transparent;border:1px dashed rgba(255,255,255,0.05);padding:6px;border-radius:8px;color:var(--muted);cursor:pointer;font-size:0.8rem;}
-.badge{display:inline-block;background:rgba(255,215,102,0.08);padding:6px 10px;border-radius:999px;color:var(--gold);font-weight:700;font-size:0.82rem}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:"Poppins",sans-serif}
+.bg-wrap{position:fixed;inset:0;z-index:-5;overflow:hidden}
+.bg-grad{position:absolute;inset:-30% -20% -20% -30%;background:
+  radial-gradient(900px 300px at 10% 12%,rgba(255,208,80,.03),transparent 8%),
+  linear-gradient(120deg,rgba(255,200,80,.02),rgba(255,160,40,.01));
+  animation:f 28s linear infinite;mix-blend-mode:screen;opacity:.95}
+@keyframes f{0%{transform:translate(-8%,0) rotate(0)}50%{transform:translate(8%,0) rotate(1deg)}100%{transform:translate(-8%,0) rotate(0)}}
+.navbar{display:flex;background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+  border-bottom:1px solid rgba(255,215,102,.06);padding:12px 18px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.logo{width:48px;height:48px;border-radius:10px;display:grid;place-items:center;font-weight:700;color:var(--gold);font-size:18px;
+  background:linear-gradient(145deg,rgba(255,208,60,.12),rgba(255,160,20,.04))}
+.h1{font-size:1.12rem;color:var(--gold);margin:0}
+.nav-links{display:flex;gap:12px;flex-wrap:wrap}
+.nav-link{padding:8px 16px;border-radius:8px;color:var(--muted);text-decoration:none;transition:.2s;cursor:pointer;font-size:.9rem}
+.nav-link.active{background:linear-gradient(90deg,var(--gold),var(--gold-2));color:#072026;font-weight:600;box-shadow:0 4px 12px rgba(255,180,40,.2)}
+.content{flex:1;display:grid;gap:20px;padding:18px;overflow-y:auto;height:calc(100vh-80px)}
+@media(max-width:768px){.content{padding:12px}.nav-links{order:3;width:100%;justify-content:center;margin-top:12px}}
+.phase{display:none;animation:fade .5s ease-in}.phase.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+  border:1px solid rgba(255,215,102,.06);border-radius:14px;padding:16px;box-shadow:var(--card-shadow)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.label{display:block;color:var(--muted);font-size:.85rem;margin-bottom:8px}
+.input{width:100%;padding:12px;border-radius:10px;border:var(--input-border);background:rgba(255,255,255,.01);
+  color:#fff;font-size:1rem;transition:border .2s}
+.input:focus{border-color:var(--gold);outline:none}
+.row{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.btn{background:linear-gradient(180deg,#FFD66F,#FFB948);color:#072026;padding:10px 14px;border-radius:12px;
+  border:none;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(255,180,40,.06)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.04);color:var(--muted)}
+.kpi{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;
+  background:linear-gradient(180deg,rgba(255,255,255,.01),rgba(255,255,255,.005));
+  border:1px solid rgba(255,255,255,.02);margin-bottom:8px}
+.kpi.highlight{background:linear-gradient(90deg,rgba(255,208,102,.15),rgba(255,185,72,.1));
+  border-color:var(--gold);box-shadow:0 4px 12px rgba(255,208,102,.2)}
+.chart-wrap{display:flex;align-items:center;justify-content:center;padding:8px;height:260px;position:relative}
+.progress-wrap{height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin:12px 0;overflow:hidden}
+.progress{height:100%;background:var(--gold);width:0;transition:width .4s ease}
+.profile-btn{padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,215,102,.1);color:var(--muted);cursor:pointer;margin-right:8px}
+.profile-btn.active{background:var(--gold);color:#072026;font-weight:600}
+.advice{margin-top:12px;padding:12px;background:rgba(255,255,255,.02);border-radius:10px;border:1px solid rgba(255,215,102,.1)}
+.advice .title{font-weight:700;color:var(--gold);margin-bottom:6px}
+.disclaimer{font-size:0.75rem;color:#6b7280;text-align:center;margin-top:24px;padding:12px;border-top:1px solid rgba(255,215,102,.1)}
+.rebalance-plan{margin-top:12px;font-size:0.9rem}
+.stage{margin-bottom:12px;padding:10px;background:rgba(255,255,255,.02);border-radius:8px}
+.stage-title{font-weight:600;color:var(--gold);margin-bottom:6px}
+.qcard{padding:20px;background:rgba(255,255,255,.02);border-radius:12px;border:1px solid rgba(255,215,102,.1);margin:16px 0}
+.qinner .question{font-weight:600;margin-bottom:12px}
+.options{display:flex;flex-direction:column;gap:10px}
+.opt{padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.04);background:rgba(255,255,255,.01);cursor:pointer;transition:.2s}
+.opt:hover{transform:translateY(-3px);background:rgba(255,208,102,.1)}
 </style>
 </head>
 <body>
-<div class="wrap" role="main" aria-label="SIP planner">
-  <div class="card">
-    <div class="brand">
-      <div class="logo" aria-hidden="true">YV</div>
-      <div>
-        <h1>YV Factor SIP Goal</h1>
-        <p class="lead">Set your target. We'll calculate the monthly SIP and show progress to the goal.</p>
-      </div>
-    </div>
+<div class="bg-wrap"><div class="bg-grad"></div></div>
 
-    <label for="goal">Goal Amount (₹)</label>
-    <input id="goal" type="number" inputmode="numeric" value="1000000" min="1" />
-
-    <label for="years">Investment Duration (years)</label>
-    <input id="years" type="number" value="10" min="1" />
-
-    <label for="returnRate">Expected Return (% p.a.)</label>
-    <input id="returnRate" type="number" value="12" min="0" step="0.1" />
-
-    <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-      <label style="display:flex;align-items:center;gap:10px;color:var(--muted);font-size:0.9rem;">
-        <input id="inflation" type="checkbox" checked /> Include inflation (3% p.a.)
-      </label>
-      <button class="copy muted-btn" id="copy-link">Copy Link</button>
-    </div>
-
-    <div class="controls" style="margin-top:18px;">
-      <button type="button" class="btn" id="calc">Calculate SIP</button>
-      <button type="button" class="muted-btn" id="reset">Reset</button>
-    </div>
-
-    <div class="small">Tip: use exact H1 value you want to reach — the calculator factors compounding.</div>
-    <div class="particles" aria-hidden="true"></div>
-  </div>
-
-  <div class="result">
-    <div class="panel" id="resultPanel" role="status" aria-live="polite">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <div class="badge">Gold Series</div>
-          <div style="font-size:0.9rem;color:var(--muted);margin-top:6px">Goal snapshot</div>
-        </div>
-        <div style="text-align:right;color:var(--muted);font-size:0.9rem">Updated on demand</div>
-      </div>
-
-      <div class="ring-wrap" style="margin-top:16px;">
-        <div class="ring" aria-hidden="true">
-          <svg width="130" height="130" viewBox="0 0 120 120" aria-hidden="true">
-            <defs>
-              <linearGradient id="g1" x1="0" x2="1">
-                <stop offset="0" stop-color="#FFD66F"/>
-                <stop offset="1" stop-color="#FFB948"/>
-              </linearGradient>
-            </defs>
-            <circle cx="60" cy="60" r="48" stroke="rgba(255,255,255,0.05)" stroke-width="12" fill="none"></circle>
-            <circle id="progress" cx="60" cy="60" r="48" stroke="url(#g1)" stroke-width="12" stroke-linecap="round" fill="none"
-              stroke-dasharray="302" stroke-dashoffset="302"></circle>
-          </svg>
-          <div class="center">
-            <div class="percent" id="percentText">0%</div>
-            <div class="label">Goal progress</div>
-          </div>
-        </div>
-
-        <div class="metrics">
-          <div class="metric">
-            <div class="left">💰 Monthly SIP</div>
-            <div class="value" id="monthly">—</div>
-          </div>
-          <div class="metric">
-            <div class="left">📈 Total Invested</div>
-            <div class="value" id="invested">—</div>
-          </div>
-          <div class="metric">
-            <div class="left">🏆 Projected Value</div>
-            <div class="value" id="value">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="note" id="inflationNote">Animation & progress show how much effort monthly will get you to the goal. Small increases compound fast.</div>
-    </div>
-
-    <div style="display:flex;gap:12px;margin-top:12px;">
-      <button type="button" class="btn" id="saveImage">Export snapshot</button>
-      <button type="button" class="muted-btn" id="shareBtn">Share</button>
-    </div>
+<div class="navbar">
+  <div class="header"><div class="logo">YV</div><h1 class="h1">YV Factor Toolkit</h1></div>
+  <div class="nav-links">
+    <a href="#" class="nav-link active" data-phase="1">1. SIP Goal Planner</a>
+    <a href="#" class="nav-link" data-phase="2">2. Performance Tracker</a>
+    <a href="#" class="nav-link" data-phase="3">3. Diversification Meter</a>
+    <a href="#" class="nav-link" data-phase="5">5. Investor DNA</a>
+    <a href="#" class="nav-link" data-phase="6">6. Wealth Visualizer</a>
   </div>
 </div>
 
-<noscript>
-  <div style="max-width:980px;margin:20px auto;padding:12px;background:#111;color:#fff;border-radius:8px;text-align:center">
-    This app requires JavaScript to calculate and display results. Please enable JavaScript in your browser.
+<div class="content">
+
+<!-- PHASE 1 -->
+<div id="phase1" class="phase active card">
+  <h2 class="h1">SIP Goal Planner</h2>
+  <p class="lead">Calculate monthly SIP with cinematic ring.</p>
+  <div class="form-grid">
+    <div><label class="label">Goal Amount (₹)</label><input class="input" id="goal1" type="number" value="1000000"></div>
+    <div><label class="label">Years</label><input class="input" id="years1" type="number" value="10"></div>
+    <div><label class="label">Expected Return (%)</label><input class="input" id="return1" type="number" value="12"></div>
+    <div><label class="label">Inflation (%)</label><input class="input" id="inflRate1" type="number" step="0.1" value="6"></div>
   </div>
-</noscript>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <div class="row"><button class="btn" id="calc1">Calculate</button><button class="btn ghost" id="next1">Next</button></div>
+  <div id="result1" style="display:none;margin-top:16px;">
+    <div class="kpi"><span class="left">Monthly SIP</span><span class="val" id="monthly1">—</span></div>
+    <div class="kpi"><span class="left">Total Invested</span><span class="val" id="invested1">—</span></div>
+    <div class="kpi"><span class="left">Projected Value</span><span class="val" id="value1">—</span></div>
+    <div class="chart-wrap"><canvas id="chart1"></canvas></div>
+    <div class="disclaimer">This is an estimate. Actual returns may vary. Consult a financial advisor for personalized advice.</div>
+  </div>
+</div>
+
+<!-- PHASE 2 -->
+<div id="phase2" class="phase card">
+  <h2 class="h1">SIP Performance Tracker</h2>
+  <p class="lead">Track your SIP's CAGR with dynamic ring.</p>
+  <div class="form-grid">
+    <div><label class="label">Total Invested (₹)</label><input class="input" id="invested2" type="number" value="120000"></div>
+    <div><label class="label">Current Value (₹)</label><input class="input" id="current2" type="number" value="160000"></div>
+    <div><label class="label">Duration (Years)</label><input class="input" id="duration2" type="number" value="3"></div>
+  </div>
+  <div class="row"><button class="btn" id="calc2">Check Performance</button><button class="btn ghost" id="next2">Next</button></div>
+  <div id="result2" style="display:none;margin-top:16px;">
+    <div class="kpi highlight"><span class="left">CAGR</span><span class="val" id="cagr2">—</span></div>
+    <div class="kpi highlight"><span class="left">Status</span><span class="val" id="status2">—</span></div>
+    <div class="chart-wrap"><canvas id="chart2"></canvas></div>
+    <div class="disclaimer">This is an estimate. Actual returns may vary. Consult a financial advisor for personalized advice.</div>
+  </div>
+</div>
+
+<!-- PHASE 3 -->
+<div id="phase3" class="phase card">
+  <h2 class="h1">Diversification Meter</h2>
+  <p class="lead">Profile-driven allocation check.</p>
+  <div id="profiles3" style="margin-bottom:12px;"></div>
+  <div class="form-grid">
+    <div><label class="label">Equity (₹)</label><input class="input" id="equity3" type="number" value="312000"></div>
+    <div><label class="label">Debt (₹)</label><input class="input" id="debt3" type="number" value="0"></div>
+    <div><label class="label">Gold (₹)</label><input class="input" id="gold3" type="number" value="900000"></div>
+    <div><label class="label">Other (₹)</label><input class="input" id="other3" type="number" value="0"></div>
+  </div>
+  <div class="row"><button class="btn" id="calc3">Analyze</button><button class="btn ghost" id="next3">Next</button></div>
+  <div id="result3" style="display:none;margin-top:16px;">
+    <div class="chart-wrap"><canvas id="chart3"></canvas></div>
+    <div class="kpi"><span class="left">Alignment Score</span><span class="val" id="score3">—</span></div>
+    <div class="advice" id="advice3"></div>
+    <div class="disclaimer">This is an estimate. Actual returns may vary. Consult a financial advisor for personalized advice.</div>
+  </div>
+</div>
+
+<!-- PHASE 5 -->
+<div id="phase5" class="phase card">
+  <h2 class="h1">Investor DNA Checker</h2>
+  <p class="lead">Discover your risk profile.</p>
+  <div class="progress-wrap"><div class="progress" id="bar5"></div></div>
+  <div class="qcard"><div class="qinner" id="qinner5">Click Start to begin.</div></div>
+  <div class="row"><button class="btn" id="start5">Start Quiz</button><button class="btn ghost" id="next5">Next</button></div>
+  <div id="result5" style="display:none;margin-top:16px;">
+    <div class="profile-label" id="profile5" style="font-size:1.2rem;color:var(--gold);font-weight:700"></div>
+    <div class="profile-desc" id="desc5" style="margin:8px 0"></div>
+    <div class="chart-wrap"><canvas id="chart5"></canvas></div>
+    <div class="disclaimer">This is an estimate. Actual returns may vary. Consult a financial advisor for personalized advice.</div>
+  </div>
+</div>
+
+<!-- PHASE 6 -->
+<div id="phase6" class="phase card">
+  <h2 class="h1">Wealth Visualizer + Advisor</h2>
+  <p class="lead">Visualize outcomes and get advice on continue/pause/stop/switch.</p>
+  <div class="form-grid">
+    <div><label class="label">Monthly SIP (₹)</label><input class="input" id="sip6" type="number" value="10000"></div>
+    <div><label class="label">Goal Years</label><input class="input" id="goal6" type="number" value="10"></div>
+    <div><label class="label">Months Held (optional)</label><input class="input" id="held6" type="number" value="0"></div>
+    <div><label class="label">Current Value (optional)</label><input class="input" id="current6" type="number" value="0"></div>
+    <div style="grid-column:1/-1"><label class="label">Fund Type</label>
+      <select class="input" id="fund6">
+        <option value="equity">Equity</option>
+        <option value="hybrid">Hybrid</option>
+        <option value="debt">Debt</option>
+      </select>
+    </div>
+  </div>
+  <div class="row"><button class="btn" id="calc6">Visualize & Advise</button></div>
+  <div id="result6" style="display:none;margin-top:16px;">
+    <div class="chart-wrap"><canvas id="chart6"></canvas></div>
+    <div class="kpi"><span class="left">Invested</span><span class="val" id="invested6">—</span></div>
+    <div class="kpi"><span class="left">Continue (nominal)</span><span class="val" id="cont6">—</span></div>
+    <div class="kpi"><span class="left">Stop (nominal)</span><span class="val" id="stop6">—</span></div>
+    <div class="kpi"><span class="left">Continue (real)</span><span class="val" id="real6">—</span></div>
+    <div class="kpi"><span class="left">Loss if stopped</span><span class="val" id="loss6">—</span></div>
+    <div class="kpi"><span class="left">Tax Impact</span><span class="val" id="tax6">—</span></div>
+    <div class="verdict" id="verdict6" style="display:none">
+      <div class="title" id="title6" style="font-size:1.2remvote;color:var(--gold);font-weight:800"></div>
+      <div id="reason6"></div>
+    </div>
+    <div class="disclaimer">This is an estimate. Actual returns may vary. Consult a financial advisor for personalized advice.</div>
+  </div>
+</div>
+
+</div>
+
 <script>
-const $ = sel => document.querySelector(sel);
+// GLOBAL
+const dataFlow = { sipMonthly:10000, riskProfile:'moderate' };
+const QUESTIONS = [
+  {q:'How do you feel about market drops?',opts:['Panic sell','Hold steady','Buy more'],vals:[0,1,2]},
+  {q:'Your investment horizon?',opts:['Short (<3 yrs)','Medium (3-7 yrs)','Long (>7 yrs)'],vals:[0,1,2]},
+  {q:'Comfort with volatility?',opts:['Low','Moderate','High'],vals:[0,1,2]},
+  {q:'Financial goal priority?',opts:['Safety','Balance','Growth'],vals:[0,1,2]},
+  {q:'Experience with investing?',opts:['None','Some','Expert'],vals:[0,1,2]}
+];
 
-// ---- helpers ----
-function nFmt(x){
-  if(isNaN(x) || !isFinite(x)) return "—";
-  const abs = Math.abs(Number(x));
-  const options = { maximumFractionDigits: abs < 1 ? 4 : 2 };
-  return '₹' + Number(x).toLocaleString('en-IN', options);
-}
+// NAVIGATION
+document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',e=>{
+  e.preventDefault();
+  document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
+  l.classList.add('active');
+  document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
+  document.getElementById(phase${l.dataset.phase}).classList.add('active');
+}));
 
-function animateValue(el, start, end, duration=900){
-  const startTime = performance.now();
-  function tick(now){
-    const t = Math.min(1, (now - startTime)/duration);
-    const val = start + (end-start) * easeOutCubic(t);
-    if (el.dataset.type === 'percent') el.textContent = Math.round(val) + '%';
-    else el.textContent = nFmt(val);
-    if(t < 1) requestAnimationFrame(tick);
-  }
+// UTILS
+function toINR(x){return isFinite(x)&&x>=0?'₹'+Number(x).toLocaleString('en-IN',{maximumFractionDigits:0}):'—';}
+function animateNum(el,start,end,dur=1200){
+  const st=performance.now();
+  const tick=n=>{const t=Math.min(1,(n-st)/dur);const v=start+(end-start)*(1-Math.pow(1-t,3));el.textContent=toINR(Math.round(v));if(t<1)requestAnimationFrame(tick);};
   requestAnimationFrame(tick);
 }
-function easeOutCubic(t){return (--t)*t*t+1;}
-
-// ---- calculation logic ----
-function compoundFutureValue(monthly, rateAnnual, years){
-  const r = rateAnnual/12/100, n = years*12;
-  if(n===0) return 0;
-  if(r===0) return monthly*n;
-  return monthly*((Math.pow(1+r,n)-1)/r);
-}
-function monthlySIPForTarget(target, rateAnnual, years){
-  const r = rateAnnual/12/100, n=years*12;
-  if(n===0) return 0;
-  if(r===0) return target/n;
-  return (target*r)/(Math.pow(1+r,n)-1);
+function scrollToResult(resultId){
+  document.getElementById(resultId).scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-// --- UI bindings ---
-const goalEl = $('#goal');
-const yearsEl = $('#years');
-const returnEl = $('#returnRate');
-const inflCheckbox = $('#inflation');
-const calcBtn = $('#calc');
-const resetBtn = $('#reset');
-const monthlyEl = $('#monthly');
-const investedEl = $('#invested');
-const valueEl = $('#value');
-const percentText = $('#percentText');
-const progressCircle = document.getElementById('progress');
-
-monthlyEl.dataset.type = 'money';
-investedEl.dataset.type = 'money';
-valueEl.dataset.type = 'money';
-percentText.dataset.type = 'percent';
-
-function updateProgressRing(pct){
-  pct = Math.max(0, Math.min(100, pct));
-  const total = 2*Math.PI*48;
-  const offset = total * (1 - pct/100);
-  progressCircle.style.strokeDasharray = total;
-  progressCircle.style.strokeDashoffset = offset;
-}
-
-function calculateAndRender(){
-  const rawGoal = Number(goalEl.value);
-  const years = Number(yearsEl.value);
-  const nominalRate = Number(returnEl.value);
-  const includeInflation = inflCheckbox.checked;
-
-  if (!isFinite(rawGoal) || rawGoal <= 0) { alert('Enter valid Goal'); return; }
-  if (!isFinite(years) || years <= 0) { alert('Enter valid Years'); return; }
-  if (!isFinite(nominalRate) || nominalRate < 0) { alert('Enter valid Return'); return; }
-
-  const inflationRate = includeInflation ? 3 : 0;
-  const inflatedGoal = rawGoal * Math.pow(1 + inflationRate/100, years);
-  const monthly = monthlySIPForTarget(inflatedGoal, nominalRate, years);
-  const months = years*12;
-  const totalInvested = monthly * months;
-  const projectedValue = compoundFutureValue(monthly, nominalRate, years);
-  const pct = inflatedGoal === 0 ? 0 : (projectedValue/inflatedGoal)*100;
-
-  animateValue(monthlyEl, parseFloat(monthlyEl.textContent.replace(/[^\d.-]+/g,''))||0, monthly);
-  animateValue(investedEl, parseFloat(investedEl.textContent.replace(/[^\d.-]+/g,''))||0, totalInvested);
-  animateValue(valueEl, parseFloat(valueEl.textContent.replace(/[^\d.-]+/g,''))||0, projectedValue);
-  animateValue(percentText, parseFloat(percentText.textContent.replace(/[^\d.-]+/g,''))||0, pct);
-
-  updateProgressRing(pct);
-  $('#inflationNote').textContent = includeInflation
-      ? `Inflation applied: ${inflationRate}% p.a — goal inflated to ${nFmt(inflatedGoal)} nominal.`
-      : 'No inflation adjustment applied.';
-
-  const resultPanel = document.getElementById('resultPanel');
-  if(resultPanel){ resultPanel.scrollIntoView({behavior: 'smooth', block: 'start'}); }
-}
-
-calcBtn.addEventListener('click', calculateAndRender);
-resetBtn.addEventListener('click',()=>{
-  goalEl.value = 1000000; yearsEl.value=10; returnEl.value=12; inflCheckbox.checked=true;
-  monthlyEl.textContent='—'; investedEl.textContent='—'; valueEl.textContent='—'; percentText.textContent='0%';
-  updateProgressRing(0);
+/* ==== PHASE 1 ==== */
+const ring1 = new Chart(document.getElementById('chart1'), {
+  type: 'doughnut',
+  data: { datasets: [{ data: [100, 0], backgroundColor: ['rgba(255,255,255,0.1)', '#FFD066'], borderWidth: 0, borderRadius: 12, cutout: '75%', hoverOffset: 16 }] },
+  options: { responsive: true, plugins: { legend: { display: false } }, animation: { animateRotate: true, duration: 1800 } },
+  plugins: [{
+    id: 'centerText',
+    afterDraw: chart => {
+      const ctx = chart.ctx; const w = chart.width, h = chart.height;
+      ctx.save(); ctx.font = 'bold 1.2rem Poppins'; ctx.fillStyle = '#FFD066'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('Growth', w/2, h/2 - 10); ctx.font = '0.9rem Poppins'; ctx.fillStyle = '#fff'; ctx.fillText('vs Invested', w/2, h/2 + 12); ctx.restore();
+    }
+  }]
 });
+document.getElementById('calc1').onclick = () => {
+  const goal = +document.getElementById('goal1').value;
+  const years = +document.getElementById('years1').value;
+  const rate = +document.getElementById('return1').value / 100;
+  const infl = +document.getElementById('inflRate1').value / 100;
+  const futureGoal = goal * Math.pow(1 + infl, years);
+  const monthlyRate = rate / 12;
+  const months = years * 12;
+  const sip = futureGoal * monthlyRate / (Math.pow(1 + monthlyRate, months) - 1);
+  const totalInvested = sip * months;
+  const projected = totalInvested * Math.pow(1 + rate, years);
+  document.getElementById('result1').style.display = 'block';
+  scrollToResult('result1');
+  animateNum(document.getElementById('monthly1'), 0, sip);
+  animateNum(document.getElementById('invested1'), 0, totalInvested);
+  animateNum(document.getElementById('value1'), 0, projected);
+  ring1.data.datasets[0].data = [totalInvested, projected - totalInvested];
+  ring1.update();
+};
+document.getElementById('next1').onclick = () => document.querySelector('[data-phase="2"]').click();
 
-// --- particles ---
-const particleContainer = document.querySelector('.particles');
-for(let i=0;i<14;i++){
-  const p = document.createElement('div'); p.className='p';
-  const size = Math.random()*16+6; p.style.width = p.style.height = size+'px';
-  p.style.left = Math.random()*100+'%';
-  p.style.animationDelay = (Math.random()*2)+'s';
-  p.style.animationDuration = (Math.random()*4+3)+'s';
-  p.style.transform = `translateY(${Math.random()*40}px)`;
-  p.style.opacity = Math.random();
-  p.style.background = `radial-gradient(circle,#FFD66F 0%, rgba(255,215,102,0.12) 40%, transparent 60%)`;
-  p.style.filter = `blur(${Math.random()*4+4}px)`; p.style.animationName='floaty';
-  particleContainer.appendChild(p);
-}
-
-// --- copy/share ---
-$('#copy-link').addEventListener('click',()=>{
-  const url = window.location.href;
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(()=>alert('Link copied!')).catch(()=> fallbackCopyTextToClipboard(url));
-  } else fallbackCopyTextToClipboard(url);
+/* ==== PHASE 2 ==== */
+const ring2 = new Chart(document.getElementById('chart2'), {
+  type: 'doughnut',
+  data: { datasets: [{ data: [0, 100], backgroundColor: ['rgba(255,255,255,0.1)', '#FFDFFD066'], borderWidth: 0, borderRadius: 10, cutout: '70%', circumference: 280, rotation: 230 }] },
+  options: { responsive: true, plugins: { legend: { display: false } }, animation: { animateRotate: true, duration: 1400 } },
+  plugins: [{
+    id: 'cagrRing',
+    afterDraw: chart => {
+      const ctx = chart.ctx; const w = chart.width, h = chart.height;
+      const cagr = document.getElementById('cagr2').textContent || '0%';
+      const status = document.getElementById('status2').textContent || '';
+      ctx.save(); ctx.font = 'bold 1.5rem Poppins'; ctx.fillStyle = '#FFD066'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(cagr, w/2, h/2 - 10); ctx.font = '0.9rem Poppins'; ctx.fillStyle = '#fff'; ctx.fillText(status, w/2, h/2 + 15); ctx.restore();
+    }
+  }]
 });
-$('#shareBtn').addEventListener('click',()=>{
-  if(navigator.share){
-    navigator.share({title:'SIP Goal Planner',url:window.location.href}).catch(()=>alert('Share failed'));
-  } else alert('Sharing not supported on this device');
-});
-function fallbackCopyTextToClipboard(text){
-  try{
-    const ta = document.createElement('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.left='-9999px';
-    document.body.appendChild(ta); ta.select();
-    const ok = document.execCommand('copy'); document.body.removeChild(ta);
-    if(ok) alert('Link copied!'); else alert('Copy failed — select and copy manually');
-  }catch(e){ alert('Copy failed — select and copy manually'); }
-}
+document.getElementById('calc2').onclick = () => {
+  const invested = +document.getElementById('invested2').value;
+  const current = +document.getElementById('current2').value;
+  const years = +document.getElementById('duration2').value;
+  const cagr = Math.pow(current / invested, 1 / years) - 1;
+  const status = cagr >= 0.12 ? 'Excellent' : cagr >= 0.08 ? 'Good' : cagr >= 0.05 ? 'Average' : 'Below Average';
+  document.getElementById('result2').style.display = 'block';
+  scrollToResult('result2');
+  document.getElementById('cagr2').textContent = '0%'; 
+  animateNum(document.getElementById('cagr2'), 0, cagr * 100, 1000); 
+  setTimeout(() => { document.getElementById('cagr2').textContent = (cagr * 100).toFixed(2) + '%'; }, 1000);
+  document.getElementById('status2').textContent = status;
+  const progress = Math.min(cagr * 100 / 0.20, 1) * 280;
+  ring2.data.datasets[0].data = [280 - progress, progress];
+  ring2.update();
+};
+document.getElementById('next2').onclick = () => document.querySelector('[data-phase="3"]').click();
 
-document.getElementById('saveImage').addEventListener('click', () => {
-  const panel = document.getElementById('resultPanel');
-  if (!panel) return;
-  
-  html2canvas(panel, { scale: 2, backgroundColor: null }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'sip-goal.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }).catch(err => {
-    console.error('Snapshot failed', err);
-    alert('Failed to export snapshot.');
+/* ==== PHASE 3 ==== */
+const pie3 = new Chart(document.getElementById('chart3'), { 
+  type: 'pie', 
+  data: { labels: ['Equity','Debt','Gold','Other'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#FFD066','#3FB0FF','#C7922E','#8B5CF6'] }] }, 
+  options: { responsive: true } 
+});
+const profiles = [
+  {key:'conservative',alloc:{eq:20,debt:60,gold:15,other:5},desc:'Safety first'},
+  {key:'moderate',alloc:{eq:50,debt:30,gold:10,other:10},desc:'Balanced'},
+  {key:'aggressive',alloc:{eq:70,debt:20,gold:5,other:5},desc:'Growth-focused'}
+];
+let activeProf = 'moderate';
+profiles.forEach(p=>{ 
+  const b=document.createElement('button'); b.className='profile-btn'; b.textContent=p.key.charAt(0).toUpperCase()+p.key.slice(1);
+  b.onclick=()=>{document.querySelectorAll('.profile-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeProf=p.key;}; 
+  if(p.key==='moderate')b.classList.add('active');
+  document.getElementById('profiles3').appendChild(b);
+});
+document.getElementById('calc3').onclick = () => {
+  const currentAmt = ['equity3','debt3','gold3','other3'].map(id=>+document.getElementById(id).value);
+  const total = currentAmt.reduce((a,b)=>a+b,0);
+  const percs = currentAmt.map(v=>total?(v/total*100).toFixed(2):0);
+  pie3.data.datasets[0].data = percs; pie3.update();
+  const target = profiles.find(p=>p.key===activeProf).alloc;
+  const score = 100 - [percs[0]-target.eq, percs[1]-target.debt, percs[2]-target.gold, percs[3]-target.other].reduce((a,b)=>a+Math.abs(b),0);
+  document.getElementById('score3').textContent = ${Math.round(score)}%;
+
+  const advice = generateDetailedAdvice(currentAmt, percs, target, total, activeProf);
+  document.getElementById('advice3').innerHTML = advice;
+  document.getElementById('result3').style.display = 'block';
+  scrollToResult('result3');
+};
+function generateDetailedAdvice(currentAmt, p, t, total, prof) {
+  const targetAmt = { eq: total * t.eq / 100, debt: total * t.debt / 100, gold: total * t.gold / 100, other: total * t.other / 100 };
+  const moves = [];
+  if (targetAmt.eq > currentAmt[0]) moves.push({ from: 'gold', to: 'Equity', amt: Math.round(targetAmt.eq - currentAmt[0]) });
+  if (targetAmt.debt > currentAmt[1]) moves.push({ from: 'gold', to: 'Debt', amt: Math.round(targetAmt.debt - currentAmt[1]) });
+  if (targetAmt.other > currentAmt[3]) moves.push({ from: 'gold', to: 'Others', amt: Math.round(targetAmt.other - currentAmt[3]) });
+  const plan = moves.reduce((acc, m) => { acc[m.to] = (acc[m.to] || 0) + m.amt; return acc; }, {});
+  const stages = [0.4, 0.3, 0.3];
+  let html = <div class="title">Target ranges vs Your allocation</div><p><strong>${prof.charAt(0).toUpperCase()+prof.slice(1)}</strong><br>Equity ${p[0]}% | Debt ${p[1]}% | Gold ${p[2]}% | Others ${p[3]}%;
+  html += <br><strong>${prof} — midpoint target: ${t.eq}/${t.debt}/${t.gold}/${t.other} %</strong><br>${profiles.find(p=>p.key===prof).desc}.</p>;
+  html += <p><strong>Portfolio total: ${toINR(total)}. Your allocation: Equity ${p[0]}%, Debt ${p[1]}%, Gold ${p[2]}%, Others ${p[3]}%</strong></p>;
+  if (moves.length) {
+    html += <p><strong>Suggested rebalancing (total ₹ amounts):</strong></p><ul>;
+    moves.forEach(m => html += <li>Move ${toINR(m.amt)} from Gold → ${m.to}</li>);
+    html += </ul><div class="rebalance-plan"><strong>3-step staged rebalancing plan</strong><br>Plan split: 40% / 30% / 30% — staggered to reduce timing risk.<br>;
+    stages.forEach((pct, i) => {
+      const stageNum = i+1;
+      html += <div class="stage"><div class="stage-title">Stage ${stageNum} — ${pct*100}% (${i===0?'Now / Week 1':i===1?'Week 3–4':'Month 2'})</div>;
+      Object.keys(plan).forEach(to => {
+        const amt = Math.round(plan[to] * pct);
+        html += <div>${toINR(amt)} → Gold → ${to}<br><small>${i===0?'Now / Week 1':i===1?'Week 3–4':'Month 2'}</small></div>;
+      });
+      html += </div>;
+    });
+    html += </div>;
+  } else {
+    html += <p><strong>You're well diversified! No rebalancing needed.</strong></p>;
+  }
+  return html;
+}
+document.getElementById('next3').onclick = () => document.querySelector('[data-phase="5"]').click();
+
+/* ==== PHASE 5 ==== */
+let qIdx=0, answers5=[];
+document.getElementById('start5').onclick=()=>{
+  qIdx=0;answers5=[];document.getElementById('bar5').style.width='0%';
+  renderQ5();document.getElementById('start5').style.display='none';
+};
+function renderQ5(){
+  if(qIdx>=QUESTIONS.length){showDNA5();return;}
+  const q=QUESTIONS[qIdx];
+  document.getElementById('qinner5').innerHTML=<div class="question">${q.q}</div><div class="options">${q.opts.map((o,i)=><div class="opt" data-val="${q.vals[i]}">${o}</div>).join('')}</div>;
+  document.querySelectorAll('#qinner5 .opt').forEach(o=>o.onclick=()=>{
+    answers5.push(+o.dataset.val);qIdx++;document.getElementById('bar5').style.width=${(qIdx/QUESTIONS.length)*100}%;renderQ5();
   });
+}
+function showDNA5(){
+  const score=answers5.reduce((a,b)=>a+b,0);
+  const profile=score<=5?'conservative':score<=8?'moderate':'aggressive';
+  document.getElementById('profile5').textContent=profile.charAt(0).toUpperCase()+profile.slice(1);
+  document.getElementById('desc5').textContent={conservative:'Safety first',moderate:'Balanced',aggressive:'Growth-focused'}[profile];
+  dataFlow.riskProfile=profile;
+  document.getElementById('result5').style.display='block';
+  scrollToResult('result5');
+}
+document.getElementById('next5').onclick = () => document.querySelector('[data-phase="6"]').click();
+
+/* ==== PHASE 6 ==== */
+const wealthChart6 = new Chart(document.getElementById('chart6'),{
+  type:'line',
+  data:{labels:[],datasets:[
+    {label:'Continue',data:[],borderColor:'#FFD066',backgroundColor:'rgba(255,208,102,.2)',fill:true,tension:.4},
+    {label:'Stop',data:[],borderColor:'#3FB0FF',backgroundColor:'rgba(63,176,255,.2)',fill:true,tension:.4}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    scales:{y:{beginAtZero:true,ticks:{color:'#bfc7d1',callback:toINR}},x:{ticks:{color:'#bfc7d1'}}},
+    plugins:{legend:{labels:{color:'#FFD066'}}},animation:{duration:1000,easing:'easeOutQuad'}
+  }
 });
+document.getElementById('calc6').onclick=()=>{
+  const P=Math.max(0,+document.getElementById('sip6').value)||10000;
+  const goalYears=Math.max(1,+document.getElementById('goal6').value)||10;
+  const monthsHeld=Math.max(0,+document.getElementById('held6').value)||0;
+  const currentValue=Math.max(0,+document.getElementById('current6').value)||0;
+  const fund=document.getElementById('fund6').value;
+  const annual=fund==='hybrid'?10:fund==='debt'?8:12;
+  const {cont,stop,months}=buildSeries(P,annual,goalYears,monthsHeld,currentValue);
+  const labels=Array.from({length:months+1},(_,i)=>i%6===0?${(i/12).toFixed(0)}y:'');
+  wealthChart6.data.labels=labels;wealthChart6.data.datasets[0].data=cont;wealthChart6.data.datasets[1].data=stop;wealthChart6.update();
+  const invested=monthsHeld>0?P*monthsHeld:P*months;
+  const contFinal=cont[cont.length-1];
+  const stopFinal=stop[stop.length-1];
+  const loss=Math.max(0,contFinal-stopFinal);
+  document.getElementById('result6').style.display='block';
+  scrollToResult('result6');
+  animateNum(document.getElementById('invested6'),0,invested);
+  animateNum(document.getElementById('cont6'),0,contFinal);
+  animateNum(document.getElementById('stop6'),0,stopFinal);
+  animateNum(document.getElementById('real6'),0,Math.round(contFinal/Math.pow(1.06,goalYears)));
+  animateNum(document.getElementById('loss6'),0,loss);
+  animateNum(document.getElementById('tax6'),0,0);
+  document.getElementById('title6').textContent='Continue';
+  document.getElementById('reason6').textContent='Strong growth trajectory.';
+  document.getElementById('verdict6').style.display='block';
+};
+function buildSeries(P,annual,years,monthsHeld,current){
+  const r=annual/12/100; const totalM=Math.round(years*12);
+  const pauseM=Math.min(Math.max(0,monthsHeld),totalM);
+  const cont=[current],stop=[current]; let fvC=current,fvS=current;
+  for(let m=1;m<=totalM;m++){
+    fvC=(fvC+P)*(1+r);cont.push(Math.round(fvC));
+    fvS=m<=pauseM?(fvS+P)(1+r):fvS(1+r);stop.push(Math.round(fvS));
+  }
+  return {cont,stop,months:totalM};
+}
 </script>
 </body>
 </html>
