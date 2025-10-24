@@ -207,7 +207,7 @@ document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',e=>
   document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));
   l.classList.add('active');
   document.querySelectorAll('.phase').forEach(p=>p.classList.remove('active'));
-  document.getElementById(phase${l.dataset.phase}).classList.add('active');
+  document.getElementById(`phase${l.dataset.phase}`).classList.add('active');
 }));
 
 // UTILS
@@ -315,7 +315,7 @@ document.getElementById('calc3').onclick = () => {
   pie3.data.datasets[0].data = percs; pie3.update();
   const target = profiles.find(p=>p.key===activeProf).alloc;
   const score = 100 - [percs[0]-target.eq, percs[1]-target.debt, percs[2]-target.gold, percs[3]-target.other].reduce((a,b)=>a+Math.abs(b),0);
-  document.getElementById('score3').textContent = ${Math.round(score)}%;
+  document.getElementById('score3').textContent = `${Math.round(score)}%`;
 
   const advice = generateDetailedAdvice(currentAmt, percs, target, total, activeProf);
   document.getElementById('advice3').innerHTML = advice;
@@ -330,25 +330,25 @@ function generateDetailedAdvice(currentAmt, p, t, total, prof) {
   if (targetAmt.other > currentAmt[3]) moves.push({ from: 'gold', to: 'Others', amt: Math.round(targetAmt.other - currentAmt[3]) });
   const plan = moves.reduce((acc, m) => { acc[m.to] = (acc[m.to] || 0) + m.amt; return acc; }, {});
   const stages = [0.4, 0.3, 0.3];
-  let html = <div class="title">Target ranges vs Your allocation</div><p><strong>${prof.charAt(0).toUpperCase()+prof.slice(1)}</strong><br>Equity ${p[0]}% | Debt ${p[1]}% | Gold ${p[2]}% | Others ${p[3]}%;
-  html += <br><strong>${prof} — midpoint target: ${t.eq}/${t.debt}/${t.gold}/${t.other} %</strong><br>${profiles.find(p=>p.key===prof).desc}.</p>;
-  html += <p><strong>Portfolio total: ${toINR(total)}. Your allocation: Equity ${p[0]}%, Debt ${p[1]}%, Gold ${p[2]}%, Others ${p[3]}%</strong></p>;
+  let html = `<div class="title">Target ranges vs Your allocation</div><p><strong>${prof.charAt(0).toUpperCase()+prof.slice(1)}</strong><br>Equity ${p[0]}% | Debt ${p[1]}% | Gold ${p[2]}% | Others ${p[3]}%`;
+  html += `<br><strong>${prof} — midpoint target: ${t.eq}/${t.debt}/${t.gold}/${t.other} %</strong><br>${profiles.find(p=>p.key===prof).desc}.</p>`;
+  html += `<p><strong>Portfolio total: ${toINR(total)}. Your allocation: Equity ${p[0]}%, Debt ${p[1]}%, Gold ${p[2]}%, Others ${p[3]}%</strong></p>`;
   if (moves.length) {
-    html += <p><strong>Suggested rebalancing (total ₹ amounts):</strong></p><ul>;
-    moves.forEach(m => html += <li>Move ${toINR(m.amt)} from Gold → ${m.to}</li>);
-    html += </ul><div class="rebalance-plan"><strong>3-step staged rebalancing plan</strong><br>Plan split: 40% / 30% / 30% — staggered to reduce timing risk.<br>;
+    html += `<p><strong>Suggested rebalancing (total ₹ amounts):</strong></p><ul>`;
+    moves.forEach(m => html += `<li>Move ${toINR(m.amt)} from Gold → ${m.to}</li>`);
+    html += `</ul><div class="rebalance-plan"><strong>3-step staged rebalancing plan</strong><br>Plan split: 40% / 30% / 30% — staggered to reduce timing risk.<br>`;
     stages.forEach((pct, i) => {
       const stageNum = i+1;
-      html += <div class="stage"><div class="stage-title">Stage ${stageNum} — ${pct*100}% (${i===0?'Now / Week 1':i===1?'Week 3–4':'Month 2'})</div>;
+      html += `<div class="stage"><div class="stage-title">Stage ${stageNum} — ${pct*100}% (${i===0?'Now / Week 1':i===1?'Week 3–4':'Month 2'})</div>`;
       Object.keys(plan).forEach(to => {
         const amt = Math.round(plan[to] * pct);
-        html += <div>${toINR(amt)} → Gold → ${to}<br><small>${i===0?'Now / Week 1':i===1?'Week 3–4':'Month 2'}</small></div>;
+        html += `<div>${toINR(amt)} → Gold → ${to}<br><small>${i===0?'Now / Week 1':i===1?'Week 3–4':'Month 2'}</small></div>`;
       });
-      html += </div>;
+      html += `</div>`;
     });
-    html += </div>;
+    html += `</div>`;
   } else {
-    html += <p><strong>You're well diversified! No rebalancing needed.</strong></p>;
+    html += `<p><strong>You're well diversified! No rebalancing needed.</strong></p>`;
   }
   return html;
 }
@@ -363,9 +363,9 @@ document.getElementById('start5').onclick=()=>{
 function renderQ5(){
   if(qIdx>=QUESTIONS.length){showDNA5();return;}
   const q=QUESTIONS[qIdx];
-  document.getElementById('qinner5').innerHTML=<div class="question">${q.q}</div><div class="options">${q.opts.map((o,i)=><div class="opt" data-val="${q.vals[i]}">${o}</div>).join('')}</div>;
+  document.getElementById('qinner5').innerHTML=`<div class="question">${q.q}</div><div class="options">${q.opts.map((o,i)=>`<div class="opt" data-val="${q.vals[i]}">${o}</div>`).join('')}</div>`;
   document.querySelectorAll('#qinner5 .opt').forEach(o=>o.onclick=()=>{
-    answers5.push(+o.dataset.val);qIdx++;document.getElementById('bar5').style.width=${(qIdx/QUESTIONS.length)*100}%;renderQ5();
+    answers5.push(+o.dataset.val);qIdx++;document.getElementById('bar5').style.width=`${(qIdx/QUESTIONS.length)*100}%`;renderQ5();
   });
 }
 function showDNA5(){
@@ -399,7 +399,7 @@ document.getElementById('calc6').onclick=()=>{
   const fund=document.getElementById('fund6').value;
   const annual=fund==='hybrid'?10:fund==='debt'?8:12;
   const {cont,stop,months}=buildSeries(P,annual,goalYears,monthsHeld,currentValue);
-  const labels=Array.from({length:months+1},(_,i)=>i%6===0?${(i/12).toFixed(0)}y:'');
+  const labels=Array.from({length:months+1},(_,i)=>i%6===0?`${(i/12).toFixed(0)}y`:'');
   wealthChart6.data.labels=labels;wealthChart6.data.datasets[0].data=cont;wealthChart6.data.datasets[1].data=stop;wealthChart6.update();
   const invested=monthsHeld>0?P*monthsHeld:P*months;
   const contFinal=cont[cont.length-1];
@@ -423,7 +423,7 @@ function buildSeries(P,annual,years,monthsHeld,current){
   const cont=[current],stop=[current]; let fvC=current,fvS=current;
   for(let m=1;m<=totalM;m++){
     fvC=(fvC+P)*(1+r);cont.push(Math.round(fvC));
-    fvS=m<=pauseM?(fvS+P)(1+r):fvS(1+r);stop.push(Math.round(fvS));
+    fvS=m<=pauseM?(fvS+P)*(1+r):fvS*(1+r);stop.push(Math.round(fvS));
   }
   return {cont,stop,months:totalM};
 }
